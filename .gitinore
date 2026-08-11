@@ -1,0 +1,22 @@
+# Datos de entrenamiento (pesan mucho y se regeneran con convertir_datos.py)
+alpaca_data_cleaned_spanish.json
+datos_entrenamiento.txt
+
+# Pesos del modelo entrenado (archivo binario grande, no debe ir al repo)
+mi_gemini_pesos.pth
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+env/
+venv/
+.venv/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Sistema
+.DS_Store
+Thumbs.db
