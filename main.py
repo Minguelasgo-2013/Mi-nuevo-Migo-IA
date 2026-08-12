@@ -19,7 +19,7 @@ RUTA_PESOS = "mi_gemini_pesos.pth"
 TAMANO_LOTE = 32          
 # Cambia esta línea que está cerca del principio de tu main.py
 BLOQUE_CONTEXTO = 64     # Cambia el 128 que pusimos antes por este 64
-PASOS_ENTRENAMIENTO = 10000 
+PASOS_ENTRENAMIENTO = 30000  # Antes 10000. Con tokens de palabras cada paso "vale más", pero igual conviene entrenar más para que la gramática mejore de verdad.
 TASA_APRENDIZAJE = 5e-4   # Ajustada para un aprendizaje más fino
 FRECUENCIA_GUARDADO = 500 
 

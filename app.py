@@ -123,6 +123,7 @@ if entrada_usuario := nn_web.chat_input("Escribe un mensaje a tu IA..."):
             x = torch.tensor([contexto_numeros], dtype=torch.long, device=dispositivo)
 
             respuesta_completa = ""
+            tokens_generados = []
 
             with torch.no_grad():
                 for _ in range(max_tokens):
@@ -132,17 +133,18 @@ if entrada_usuario := nn_web.chat_input("Escribe un mensaje a tu IA..."):
 
                     probs = F.softmax(logits, dim=-1)
                     siguiente_token = torch.multinomial(probs, num_samples=1)
+                    id_token = siguiente_token.item()
 
-                    letra_decodificada = tokenizador.decodificar([siguiente_token.item()])
-
-                    # Si la IA decide terminar la frase o abrir otra etiqueta, frena
-                    if "<|" in letra_decodificada:
+                    # Si la IA decide abrir una nueva etiqueta (fin de la respuesta), frena
+                    palabra_generada = tokenizador.int_a_token.get(id_token, "")
+                    if palabra_generada in ("<|usuario|>", "<|asistente|>"):
                         break
 
-                    respuesta_completa += letra_decodificada
+                    tokens_generados.append(id_token)
+                    respuesta_completa = tokenizador.decodificar(tokens_generados)
                     contenedor_respuesta.markdown(respuesta_completa + "▌")
                     x = torch.cat((x, siguiente_token), dim=1)
-                    time.sleep(0.01)  # Simulación de fluidez visual
+                    time.sleep(0.02)  # Simulación de fluidez visual
 
             contenedor_respuesta.markdown(respuesta_completa if respuesta_completa.strip() else "*(La IA generó un silencio, necesita más entrenamiento)*")
             nn_web.session_state.mensajes.append({"rol": "assistant", "texto": respuesta_completa})

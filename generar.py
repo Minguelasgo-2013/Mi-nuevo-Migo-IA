@@ -70,29 +70,34 @@ while True:
 
     print("🤖 IA: ", end="", flush=True)
 
-    # Bucle de generación letra por letra (Auto-regresivo)
+    # Bucle de generación palabra por palabra (Auto-regresivo)
+    tokens_generados = []
+    texto_previo = ""
     with torch.no_grad():
         for _ in range(MAX_TOKENS_RESPUESTA):
             # Recortar el contexto si supera el tamaño de bloque que la IA puede recordar
             x_cond = x[:, -64:] # 64 es el BLOQUE_CONTEXTO definido originalmente
 
-            # Predecir las probabilidades de la siguiente letra
+            # Predecir las probabilidades de la siguiente palabra
             logits = modelo(x_cond)
             logits = logits[:, -1, :] / TEMPERATURA # Aplicar temperatura para regular creatividad
 
-            # Convertir probabilidades en la siguiente letra elegida
+            # Convertir probabilidades en la siguiente palabra elegida
             probs = F.softmax(logits, dim=-1)
             siguiente_token = torch.multinomial(probs, num_samples=1)
+            id_token = siguiente_token.item()
 
-            # Detenerse si la IA decide escribir una nueva etiqueta de usuario (fin de respuesta)
-            letra_decodificada = tokenizador.decodificar([siguiente_token.item()])
-            if "<|" in letra_decodificada:
+            # Detenerse si la IA decide escribir una nueva etiqueta (fin de respuesta)
+            palabra_generada = tokenizador.int_a_token.get(id_token, "")
+            if palabra_generada in ("<|usuario|>", "<|asistente|>"):
                 break
 
-            # Imprimir la letra en la pantalla al instante
-            print(letra_decodificada, end="", flush=True)
+            # Añadir la palabra al historial y mostrar solo lo nuevo en pantalla
+            tokens_generados.append(id_token)
+            texto_actual = tokenizador.decodificar(tokens_generados)
+            print(texto_actual[len(texto_previo):], end="", flush=True)
+            texto_previo = texto_actual
 
-            # Añadir la letra recién generada al historial para calcular la siguiente
             x = torch.cat((x, siguiente_token), dim=1)
 
     print() # Salto de línea final al terminar la respuesta
